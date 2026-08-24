@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#111">
+<title>BEYBLADE X Point Counter</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#0d0d10;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;min-height:100vh}
+.app{max-width:520px;margin:auto;padding:18px 14px calc(24px + env(safe-area-inset-bottom))}
+h1{text-align:center;font-size:20px;margin:4px 0 16px;letter-spacing:.04em}
+.scoreboard{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.player{background:#18181d;border:1px solid #303039;border-radius:18px;padding:14px 10px;text-align:center}
+.name{font-size:16px;font-weight:700}
+.score{font-size:76px;line-height:1;margin:10px 0 14px;font-weight:800}
+.winner{color:#ffd43b}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{border:0;border-radius:13px;background:#2a2a32;color:#fff;font-size:16px;font-weight:700;padding:14px 6px;min-height:52px}
+button:active{transform:scale(.97);filter:brightness(1.2)}
+.sp{border:1px solid #555}
+.ov{border:1px solid #5b82ff}
+.bu{border:1px solid #b35cff}
+.ex{border:1px solid #ff4f5e}
+.reset{width:100%;margin-top:14px;background:#222228;border:1px solid #3c3c45}
+.undo{width:100%;margin-top:8px;background:#15151a;border:1px solid #303039;font-size:14px}
+.status{text-align:center;margin:14px 0 2px;color:#aaa;font-size:13px}
+.rules{margin-top:18px;background:#141419;border-radius:14px;padding:12px 14px;color:#bbb;font-size:13px;line-height:1.8}
+.rules b{color:#fff}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>BEYBLADE X<br>POINT COUNTER</h1>
+  <div class="scoreboard">
+    <section class="player" id="p0">
+      <div class="name">PLAYER 1</div>
+      <div class="score" id="s0">0</div>
+      <div class="buttons">
+        <button class="sp" data-player="0" data-points="1">スピン<br>+1</button>
+        <button class="ov" data-player="0" data-points="2">オーバー<br>+2</button>
+        <button class="bu" data-player="0" data-points="2">バースト<br>+2</button>
+        <button class="ex" data-player="0" data-points="3">エクストリーム<br>+3</button>
+      </div>
+    </section>
+    <section class="player" id="p1">
+      <div class="name">PLAYER 2</div>
+      <div class="score" id="s1">0</div>
+      <div class="buttons">
+        <button class="sp" data-player="1" data-points="1">スピン<br>+1</button>
+        <button class="ov" data-player="1" data-points="2">オーバー<br>+2</button>
+        <button class="bu" data-player="1" data-points="2">バースト<br>+2</button>
+        <button class="ex" data-player="1" data-points="3">エクストリーム<br>+3</button>
+      </div>
+    </section>
+  </div>
+  <div class="status" id="status">4点先取</div>
+  <button class="reset" id="resetBtn">試合をリセット</button>
+  <button class="undo" id="undoBtn">↩ 1手戻す</button>
+  <div class="rules">
+    <b>得点</b><br>
+    スピンフィニッシュ：1点　／　オーバーフィニッシュ：2点<br>
+    バーストフィニッシュ：2点　／　エクストリームフィニッシュ：3点
+  </div>
+</div>
+<script>
+document.querySelectorAll("[data-player]").forEach(btn => {
+  btn.addEventListener("click", () => add(Number(btn.dataset.player), Number(btn.dataset.points)));
+  btn.addEventListener("touchend", (e) => { e.preventDefault(); btn.click(); }, {passive:false});
+});
+document.getElementById("resetBtn").addEventListener("click", resetGame);
+document.getElementById("undoBtn").addEventListener("click", undo);
+let scores=[0,0], history=[];
+const target=4;
+function render(){
+  for(let i=0;i<2;i++) document.getElementById('s'+i).textContent=scores[i];
+  document.getElementById('p0').querySelector('.score').classList.toggle('winner',scores[0]>=target);
+  document.getElementById('p1').querySelector('.score').classList.toggle('winner',scores[1]>=target);
+  const w=scores.findIndex(x=>x>=target);
+  document.getElementById('status').textContent=w>=0?`PLAYER ${w+1} WIN!`:`4点先取`;
+}
+function add(player,points,type){
+  if(scores.some(x=>x>=target)) return;
+  history.push([...scores]);
+  scores[player]+=points;
+  if(scores[player]>target) scores[player]=target;
+  render();
+}
+function undo(){
+  if(!history.length) return;
+  scores=history.pop();
+  render();
+}
+function resetGame(){scores=[0,0];history=[];render();}
+render();
+</script>
+</body>
+</html>
