@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#030503">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>BEYBLADE X POINT COUNTER</title>
+<style>
+:root{--g:#b7ff00;--bg:#030503;--panel:#080b08;--line:#536d12}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+ margin:0;background:
+ radial-gradient(circle at 88% 7%,rgba(183,255,0,.10) 0 1px,transparent 2px),
+ radial-gradient(circle at 12% 91%,rgba(183,255,0,.08) 0 1px,transparent 2px),
+ repeating-linear-gradient(135deg,rgba(183,255,0,.018) 0 1px,transparent 1px 9px),
+ #020302;color:#fff;font-family:Arial,"Helvetica Neue",sans-serif
+}
+.app{
+ max-width:680px;margin:auto;min-height:100vh;padding:10px 10px 20px;
+ background:
+ radial-gradient(ellipse at 50% 12%,rgba(183,255,0,.12),transparent 34%),
+ linear-gradient(180deg,rgba(3,5,3,.96),rgba(3,5,3,.99));
+ position:relative;overflow:hidden
+}
+.app:before{
+ content:"";position:fixed;inset:0;pointer-events:none;opacity:.20;
+ background:
+ linear-gradient(90deg,transparent 0 9%,rgba(183,255,0,.22) 9% 9.2%,transparent 9.2% 90.8%,rgba(183,255,0,.22) 90.8% 91%,transparent 91%),
+ repeating-linear-gradient(0deg,transparent 0 39px,rgba(183,255,0,.035) 39px 40px);
+ z-index:0
+}
+.app>*{position:relative;z-index:1}
+.panel{border:1px solid var(--line);background:#050705;position:relative}
+.header{text-align:center;padding:10px 5px 12px;margin-bottom:8px}
+.brand{color:var(--g);font-size:clamp(27px,7vw,44px);font-weight:1000;font-style:italic;letter-spacing:-.06em;text-shadow:0 0 12px #b7ff0044}
+.sub{color:var(--g);font-weight:900;letter-spacing:.1em;font-size:clamp(14px,3.7vw,21px)}
+.scoreboard{display:grid;grid-template-columns:1fr 1fr;min-height:275px;position:relative;overflow:hidden}
+.player{text-align:center;padding:14px 4px}
+.name{color:var(--g);font-size:clamp(16px,4.2vw,24px);font-weight:1000}
+.score{font-family:Arial Black,Arial,sans-serif;font-size:clamp(100px,26vw,170px);line-height:.8;font-weight:1000;margin-top:34px;text-shadow:0 0 14px #fff2}
+.score.win{color:var(--g);text-shadow:0 0 18px #b7ff0088}
+.vs{position:absolute;left:50%;top:42px;transform:translateX(-50%) skew(-10deg);color:var(--g);font:bold italic clamp(34px,10vw,62px) Arial Black}
+.first{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);text-align:center;color:var(--g);font-weight:900;font-size:10px;letter-spacing:.12em}
+.first strong{display:block;color:#fff;font-size:42px;line-height:1}
+.status{width:max-content;margin:8px auto 12px;padding:6px 25px;border:1px solid var(--line);color:var(--g);font-weight:900;font-size:11px;letter-spacing:.1em}
+.finish-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 5px 14px}
+.finish-column{display:flex;flex-direction:column;gap:7px}
+.finish-player{text-align:center;color:var(--g);font-size:11px;font-weight:1000;letter-spacing:.1em;margin-bottom:1px}
+.finish{min-height:67px;border:1px solid var(--g);background:linear-gradient(180deg,#101410,#050705);color:#fff;clip-path:polygon(8% 0,92% 0,100% 15%,100% 85%,92% 100%,8% 100%,0 85%,0 15%);font-weight:1000}
+.finish:active{transform:scale(.95);filter:brightness(1.5)}
+.label{display:block;font-size:clamp(10px,2.8vw,16px);white-space:nowrap}
+.pts{display:block;color:var(--g);font-size:10px;margin-top:4px}
+.history{margin:0 5px 14px;overflow:hidden}
+.title{text-align:center;color:var(--g);font-size:15px;font-weight:1000;letter-spacing:.12em;padding:10px;border-bottom:1px solid #26351a}
+.rows{position:relative}
+.rows:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--g);opacity:.6}
+.row{display:grid;grid-template-columns:1fr 1fr;min-height:61px;border-bottom:1px solid #263024;position:relative}
+.row:last-child{border:0}
+.row:after{content:attr(data-n);position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:27px;height:27px;border:1px solid var(--g);background:#060906;clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);display:grid;place-items:center;color:var(--g);font-size:11px;font-weight:900}
+.side{padding:8px 18px;display:flex;flex-direction:column;justify-content:center}
+.left{text-align:left;align-items:flex-start}.right{text-align:right;align-items:flex-end}
+.side.active.left{border-left:6px solid var(--g)}.side.active.right{border-right:6px solid var(--g)}
+.finish-name{font-size:clamp(11px,3.2vw,17px);font-weight:1000}
+.history-pts{color:var(--g);font-size:10px;font-weight:900;margin-top:2px}
+.empty{text-align:center;color:#626a5f;font-size:11px;padding:22px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 5px}
+.action{min-height:58px;border:1px solid var(--line);background:#080b08;color:var(--g);font-size:14px;font-weight:1000;letter-spacing:.07em}
+.action:active{transform:scale(.98);background:#17200e}
+@media(max-width:360px){.finish{min-height:61px}.label{font-size:9px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="panel header"><div class="brand">BEYBLADE X</div><div class="sub">POINT COUNTER</div></header>
+
+<section class="panel scoreboard">
+  <div class="player"><div class="name">PLAYER 1</div><div id="s0" class="score">0</div></div>
+  <div class="player"><div class="name">PLAYER 2</div><div id="s1" class="score">0</div></div>
+  <div class="vs">VS</div>
+  <div class="first">FIRST TO<strong>4</strong>POINTS</div>
+</section>
+<div id="status" class="status">MATCH IN PROGRESS</div>
+
+<section class="finish-grid">
+  <div class="finish-column">
+    <div class="finish-player">PLAYER 1</div>
+    <button class="finish" data-p="0" data-v="1" data-f="SPIN FINISH"><span class="label">SPIN FINISH</span><span class="pts">+1</span></button>
+    <button class="finish" data-p="0" data-v="2" data-f="OVER FINISH"><span class="label">OVER FINISH</span><span class="pts">+2</span></button>
+    <button class="finish" data-p="0" data-v="2" data-f="BURST FINISH"><span class="label">BURST FINISH</span><span class="pts">+2</span></button>
+    <button class="finish" data-p="0" data-v="3" data-f="EXTREME FINISH"><span class="label">EXTREME FINISH</span><span class="pts">+3</span></button>
+  </div>
+  <div class="finish-column">
+    <div class="finish-player">PLAYER 2</div>
+    <button class="finish" data-p="1" data-v="1" data-f="SPIN FINISH"><span class="label">SPIN FINISH</span><span class="pts">+1</span></button>
+    <button class="finish" data-p="1" data-v="2" data-f="OVER FINISH"><span class="label">OVER FINISH</span><span class="pts">+2</span></button>
+    <button class="finish" data-p="1" data-v="2" data-f="BURST FINISH"><span class="label">BURST FINISH</span><span class="pts">+2</span></button>
+    <button class="finish" data-p="1" data-v="3" data-f="EXTREME FINISH"><span class="label">EXTREME FINISH</span><span class="pts">+3</span></button>
+  </div>
+</section>
+
+<section class="panel history">
+  <div class="title">MATCH HISTORY</div>
+  <div id="rows" class="rows"><div class="empty">NO POINTS YET</div></div>
+</section>
+
+<div class="actions"><button id="undo" class="action">↩ UNDO</button><button id="reset" class="action">↻ RESET MATCH</button></div>
+</div>
+<script>
+const TARGET=4;let score=[0,0],events=[];
+function render(){
+ document.getElementById('s0').textContent=score[0];document.getElementById('s1').textContent=score[1];
+ let w=score.findIndex(x=>x>=TARGET);
+ document.getElementById('s0').classList.toggle('win',w===0);document.getElementById('s1').classList.toggle('win',w===1);
+ document.getElementById('status').textContent=w<0?'MATCH IN PROGRESS':`PLAYER ${w+1} WINS`;
+ let r=document.getElementById('rows');
+ if(!events.length){r.innerHTML='<div class="empty">NO POINTS YET</div>';return}
+ r.innerHTML=events.map((e,i)=>`<div class="row" data-n="${i+1}"><div class="side left ${e.p===0?'active':''}">${e.p===0?`<div class="finish-name">${e.f}</div><div class="history-pts">+${e.v}</div>`:''}</div><div class="side right ${e.p===1?'active':''}">${e.p===1?`<div class="finish-name">${e.f}</div><div class="history-pts">+${e.v}</div>`:''}</div></div>`).join('');
+}
+document.querySelectorAll('.finish').forEach(b=>b.addEventListener('click',()=>{
+ let p=+b.dataset.p,v=+b.dataset.v;if(score.some(x=>x>=TARGET))return;
+ events.push({p,v,f:b.dataset.f,before:[...score]});score[p]=Math.min(TARGET,score[p]+v);render();
+}));
+document.getElementById('undo').onclick=()=>{let e=events.pop();if(e){score=e.before;render()}};
+document.getElementById('reset').onclick=()=>{score=[0,0];events=[];render()};
+render();
+</script>
+</body>
+</html>
